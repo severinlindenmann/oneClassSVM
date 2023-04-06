@@ -9,7 +9,7 @@ import pickle
 from sklearn.manifold import TSNE
 import plotly.express as px
 import plotly.graph_objs as go
-import urllib.request
+# import urllib.request
 
 st.title('Outlier Detection')
 st.subheader('One Class SVM')
@@ -173,8 +173,8 @@ df.to_pickle('spam_mail.pkl')
     @st.cache_data
     def load_pickle_df(tt):   
         url = f'https://s3.severin.io/ml%2F{tt}.pkl'
-        with urllib.request.urlopen(url) as f:
-            return pickle.load(f)
+        with open('spam_mail.pkl', 'rb') as pickle_file:
+            return pickle.load(pickle_file)
     
     df = load_pickle_df('spam_mail')
 
