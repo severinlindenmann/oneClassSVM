@@ -171,12 +171,12 @@ df.to_pickle('spam_mail.pkl')
     tab2.subheader('Data Table')
 
     @st.cache_data
-    def load_pickle_df():   
-        url = 'https://s3.severin.io/ml%2Fspam_mail.pkl'
+    def load_pickle_df(tt):   
+        url = f'https://s3.severin.io/ml%2F{tt}.pkl'
         with urllib.request.urlopen(url) as f:
             return pickle.load(f)
     
-    df = load_pickle_df()
+    df = load_pickle_df('spam_mail')
 
     # tab2.pyplot(fig)
     tab2.dataframe(df)
@@ -188,26 +188,28 @@ df.to_pickle('spam_mail.pkl')
 
     features = ['char_length', 'token_length', 'num_nouns', 'num_stopwords', 'avg_token_length', 'num_special_chars', 'num_uppercase_words', 'num_adverbs', 'num_personal_pronouns', 'num_possessive_pronouns', 'num_capital_letters']
     # Extract the features we want to use for visualization
-    X = df[features]
-    y = df['target']
+    yy = load_pickle_df('spam_mail_target')
 
     @st.cache_resource
-    def load_tsne(X):
-        url = 'https://s3.severin.io/ml%2FX_tsne.npy'
-        with urllib.request.urlopen(url) as f:
-            return np.load(f)
+    def load_tsne():
+        # url = 'https://s3.severin.io/ml%2FX_tsne.npy'
+        # with urllib.request.urlopen(url) as f:
+        with open('TSNE_x.pkl', 'rb') as pickle_file:
+            return pickle.load(pickle_file)
         # # Perform t-SNE to project the data onto a 3D space
         # tsne = TSNE(n_components=3, random_state=42)
         # return tsne.fit_transform(X)
 
+    X_tsne = load_tsne()
+
     # Create a Trace object for each class label
-    classes = df['target'].unique()
+    classes = yy.unique()
     traces = []
     for c in classes:
         mask = df['target'] == c
         color = 'red' if c == 1 else 'blue'
         trace = go.Scatter3d(x=X_tsne[mask, 0], y=X_tsne[mask, 1], z=X_tsne[mask, 2], mode='markers',
-                             marker=dict(color=y[mask], colorscale=[[0, color], [1, color]], size=5, opacity=0.8),
+                             marker=dict(color=yy, colorscale=[[0, color], [1, color]], size=5, opacity=0.8),
                              name=str(c))
         traces.append(trace)
 
