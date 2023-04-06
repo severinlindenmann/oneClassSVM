@@ -172,16 +172,12 @@ df.to_pickle('spam_mail.pkl')
 
     @st.cache_data
     def load_pickle_df(tt):   
-        url = f'https://s3.severin.io/ml%2F{tt}.pkl'
-        with open('spam_mail.pkl', 'rb') as pickle_file:
+        with open(f'{tt}.pkl', 'rb') as pickle_file:
             return pickle.load(pickle_file)
     
     df = load_pickle_df('spam_mail')
 
-    # tab2.pyplot(fig)
-    tab2.dataframe(df)
-
-    tab2.subheader('2d Plot of Features')
+    tab2.subheader('3d Plot of Features')
     tab2.write('We use the t-SNE algorithm to project the data onto a 3D space. The plot shows that the spam emails are more spread out than the non-spam emails.')
     tab2.write('0: Non-Spam')
     tab2.write('1: Spam')
@@ -206,7 +202,7 @@ df.to_pickle('spam_mail.pkl')
     classes = yy.unique()
     traces = []
     for c in classes:
-        mask = df['target'] == c
+        mask = yy == c
         color = 'red' if c == 1 else 'blue'
         trace = go.Scatter3d(x=X_tsne[mask, 0], y=X_tsne[mask, 1], z=X_tsne[mask, 2], mode='markers',
                              marker=dict(color=yy, colorscale=[[0, color], [1, color]], size=5, opacity=0.8),
