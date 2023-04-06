@@ -1,16 +1,23 @@
-FROM python:3.9-slim-buster
+# For more information, please refer to https://aka.ms/vscode-docker-python
+FROM python:3.10.0-slim
 
-# Set the working directory
-WORKDIR /app
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
 
-# Copy the requirements file into the container
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+
+# Install pip requirements
 COPY requirements.txt .
+RUN python -m pip install -r requirements.txt
 
-# Install the required packages
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /app
+COPY . /app
 
-# Copy the app code into the container
-COPY . ./app
+# Creates a non-root user with an explicit UID and adds permission to access the /app folder
+# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
+RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
+USER appuser
 
-# Set the command to run the app when the container starts
-CMD ["streamlit", "run", "ocsvm.py"]
+# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+CMD ["streamlit", "run", "ocsvm.py","--server.port","8080","--server.headless","true"]
