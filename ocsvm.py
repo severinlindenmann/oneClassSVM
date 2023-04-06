@@ -172,7 +172,7 @@ df.to_pickle('spam_mail.pkl')
 
     @st.cache_data
     def load_pickle_df():   
-        url = 'https://severin.fra1.cdn.digitaloceanspaces.com/ml%2Fspam_mail.pkl'
+        url = 'https://s3.severin.io/ml%2Fspam_mail.pkl'
         with urllib.request.urlopen(url) as f:
             return pickle.load(f)
     
@@ -192,12 +192,13 @@ df.to_pickle('spam_mail.pkl')
     y = df['target']
 
     @st.cache_resource
-    def create_tsne(X):
-        # Perform t-SNE to project the data onto a 3D space
-        tsne = TSNE(n_components=3, random_state=42)
-        return tsne.fit_transform(X)
-
-    X_tsne = create_tsne(X)
+    def load_tsne(X):
+        url = 'https://s3.severin.io/ml%2FX_tsne.npy'
+        with urllib.request.urlopen(url) as f:
+            return np.load(f)
+        # # Perform t-SNE to project the data onto a 3D space
+        # tsne = TSNE(n_components=3, random_state=42)
+        # return tsne.fit_transform(X)
 
     # Create a Trace object for each class label
     classes = df['target'].unique()
