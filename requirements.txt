@@ -4,4 +4,5 @@ numpy
 scikit-learn
 matplotlib
 plotly
-urllib3
+python-dotenv
+nltk
