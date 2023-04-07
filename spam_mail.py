@@ -13,10 +13,17 @@ import os.path
 import pickle
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 import numpy as np
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-# Download the NLTK Data
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+### check if run locally or in the cloud, the cloud can't handle the large dataset (performance issue)
+LOCAL = os.getenv('LOCAL')
+
+if LOCAL == 'True':
+    # Download the NLTK Data
+    nltk.download('punkt')
+    nltk.download('averaged_perceptron_tagger')
 
 @st.cache_data #for caching the data in streamlit
 def get_dataset():
