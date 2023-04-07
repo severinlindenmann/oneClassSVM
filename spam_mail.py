@@ -16,6 +16,7 @@ import numpy as np
 
 # Download the NLTK Data
 nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 @st.cache_data #for caching the data in streamlit
 def get_dataset():
@@ -237,7 +238,7 @@ def visualize_onclasssvm(df, y_pred):
     # Set the layout parameters, including the legend
     fig.update_layout(scene=dict(xaxis_title='t-SNE Dimension 1', yaxis_title='t-SNE Dimension 2',
                                   zaxis_title='t-SNE Dimension 3'),
-                      title='t-SNE Visualization of Email Features', showlegend=True)
+                      title='t-SNE Visualization of the Predicted Email Features', showlegend=True)
     return fig
 
 

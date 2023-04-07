@@ -70,17 +70,22 @@ with tab1.expander('Code', expanded=False):
 ### Dataset
 ## Check if the dataset is selected and load the dataset
 if datasets == 'Spam Mail':
+    tab2.info("Click Render & Update in the sidebar left to load the dataset and train the model")
+    
+
     tab2.subheader('Spam Mail')
     tab2.write('The dataset is loaded using the read_csv function from the pandas module. The dataset contains 5329 emails. The emails are divided into 2 classes: spam and ham.')
     tab2.write('3900 no spam (ham) and 1896 is spam.')
     tab2.write('Source: https://www.kaggle.com/datasets/ganiyuolalekan/spam-assassin-email-classification-dataset?resource=download')
     
-    update = st.sidebar.button('Update')
+    update = st.sidebar.button('Render & Update')
     if update:
         if LOCAL == 'FALSE':
             tab2.info('The dataset is too large to be loaded and process live in the cloud, we will show you the preprocessed dataset and model')
 
         if LOCAL == 'TRUE':
-            spam_mail_local(tab2, kernel, nu, gamma, degree, score)
+            with st.spinner('Wait for it...'):
+                tab2.info("It will take a while to load the dataset and train the model, please have patience")
+                spam_mail_local(tab2, kernel, nu, gamma, degree, score)
 
 print('SUCCESSFULLY RUN')
