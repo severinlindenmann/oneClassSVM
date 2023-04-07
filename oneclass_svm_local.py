@@ -36,6 +36,7 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score):
 
     ### Create 3d Visualization with t-SNE
     tab.subheader('Create 3d Visualization with t-SNE')
+    tab.write('We use the t-SNE algorithm to create a 3d visualization of the dataset. The visualization shows the spam and ham mails in a 3d space. The visualization shows that the spam mails and ham mails show some patterns. The ham mail create a spiral and the spam mails are more outside of the spiral.')
     X = spam_mail_tsne(df_mail_w_features)
     fig = create_3d_visualization(X, df_mail_w_features)
     tab.plotly_chart(fig)
@@ -47,22 +48,33 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score):
 
     ### One Class SVM
     tab.subheader('One Class SVM Prediction')
+    tab.write('We use the One Class SVM algorithm to predict the spam mails. We use the following parameters settings:')
+    tab.subheader('Settings')
 
     fig, result = create_oneclass_svm_predict(df_mail_w_features, kernel, nu, gamma, degree)
     
     col1, col2 = tab.columns(2)
     col3, col4 = tab.columns(2)
+
+    col1.metric('Kernel', kernel)
+    col2.metric('Nu', nu)
+    col3.metric('Gamma', gamma)
+    col4.metric('Degree', degree)
+
+    tab.subheader('Results')
+    tab.write('We got with this kernel the following results:')
     col5, col6 = tab.columns(2)
+    col7, col8 = tab.columns(2)
 
-    col1.write('Kernel: ' + kernel)
-    col2.write('Nu: ' + str(nu))
-    col3.write('Gamma: ' + str(gamma))
-    col4.write('Degree: ' + str(degree))
-    col5.write('Results:')
-    col6.write(result)
+    col5.metric('Accuracy', result['Accuracy'])
+    col6.metric('Precision', result['Precision'])
+    col7.metric('Recall', result['Recall'])
+    col8.metric('F1 Score', result['F1 Score'])
 
+    tab.write('Like before we create a 3d visualization of the dataset, but know we match the colors if the mail is a ham or spam and if it is predicted correctly or not.')
+    tab.write('The rbf kernel shows the best results. The sigmoid kernel shows the worst results, but that could also be our fault because we did not tune the parameters good enough for sigmoid.')
+    
     tab.plotly_chart(fig)
-
 
     ## show the code
     with tab.expander('Code', expanded=False):

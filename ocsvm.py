@@ -20,13 +20,13 @@ st.sidebar.write('This dashboard is used to detect outliers in the dataset')
 st.sidebar.title('Hyperparameters')
 
 kernel = st.sidebar.selectbox('Kernel', ('rbf', 'linear', 'poly', 'sigmoid'))
-nu = st.sidebar.slider('NU', 0.05, 0.95, 0.05)
-gamma = st.sidebar.slider('GAMMA', 0.5, 50.0, 0.5)
+nu = st.sidebar.slider('NU', 0.05, 0.95, 0.1, 0.05)
+gamma = st.sidebar.slider('GAMMA', 0.5, 50.0, 10.0, 0.5)
 score = st.sidebar.slider('SCORE', 0.1, 1.0, 0.5, 0.1)
 
 degree = 0 
 if kernel == 'poly': # only for poly
-    degree = st.sidebar.slider('Degree', 0, 10, 1)
+    degree = st.sidebar.slider('Degree', 0, 10, 3, 1)
 
 st.sidebar.title('Explore a Dataset')
 datasets = st.sidebar.selectbox('Dataset', ('Spam Mail', 'Spam Mail'))
@@ -71,22 +71,25 @@ with tab1.expander('Code', expanded=False):
 ### Dataset
 ## Check if the dataset is selected and load the dataset
 if datasets == 'Spam Mail':
-    tab2.info("Click Render & Update in the sidebar left to load the dataset and train the model")
-    
-
+    tab2.info('The dataset is too large to be loaded and process live in the cloud, we will show you the preprocessed dataset and model instead, you still can choose a different kernel but the parameters will be ignored')
     tab2.subheader('Spam Mail')
     tab2.write('The dataset is loaded using the read_csv function from the pandas module. The dataset contains 5329 emails. The emails are divided into 2 classes: spam and ham.')
     tab2.write('3900 no spam (ham) and 1896 is spam.')
     tab2.write('Source: https://www.kaggle.com/datasets/ganiyuolalekan/spam-assassin-email-classification-dataset?resource=download')
     
-    update = st.sidebar.button('Render & Update')
+    # update = st.sidebar.button('Render & Update')
+    update = True
     if update:
         if LOCAL == 'FALSE':
-            tab2.info('The dataset is too large to be loaded and process live in the cloud, we will show you the preprocessed dataset and model instead')
             spam_mail_cloud(tab2, kernel, nu, gamma, degree, score)
 
         if LOCAL == 'TRUE':
             with st.spinner('It will take a while to load the dataset and train the model, please have patience'):
                 spam_mail_local(tab2, kernel, nu, gamma, degree, score)
 
-print('SUCCESSFULLY RUN')
+if LOCAL == 'TRUE':
+    env = 'LOCAL'
+else:
+    env = 'CLOUD'
+
+print(f'SUCCESSFULLY RUN IN THE {env} ENVIRONMENT')
