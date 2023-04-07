@@ -84,8 +84,7 @@ if datasets == 'Spam Mail':
             tab2.info('The dataset is too large to be loaded and process live in the cloud, we will show you the preprocessed dataset and model')
 
         if LOCAL == 'TRUE':
-            with st.spinner('Wait for it...'):
-                tab2.info("It will take a while to load the dataset and train the model, please have patience")
+            with st.spinner('It will take a while to load the dataset and train the model, please have patience'):
                 spam_mail_local(tab2, kernel, nu, gamma, degree, score)
 
 print('SUCCESSFULLY RUN')
