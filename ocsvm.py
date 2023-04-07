@@ -1,6 +1,7 @@
 import streamlit as st
 from oneclass_svm_sample import generate_example_data, create_oneclasssvm_demo, create_oneclasssvm_2d_countour_demo
 from oneclass_svm_local import spam_mail_local
+from oneclass_svm_cloud import spam_mail_cloud
 import inspect
 from dotenv import load_dotenv
 import os
@@ -81,7 +82,8 @@ if datasets == 'Spam Mail':
     update = st.sidebar.button('Render & Update')
     if update:
         if LOCAL == 'FALSE':
-            tab2.info('The dataset is too large to be loaded and process live in the cloud, we will show you the preprocessed dataset and model')
+            tab2.info('The dataset is too large to be loaded and process live in the cloud, we will show you the preprocessed dataset and model instead')
+            spam_mail_cloud(tab2, kernel, nu, gamma, degree, score)
 
         if LOCAL == 'TRUE':
             with st.spinner('It will take a while to load the dataset and train the model, please have patience'):
