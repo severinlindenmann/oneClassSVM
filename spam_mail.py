@@ -15,8 +15,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import numpy as np
 
 # Download the NLTK Data
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+nltk.download('punkt', download_dir='ml')
+nltk.download('averaged_perceptron_tagger',download_dir='ml')
 
 @st.cache_data #for caching the data in streamlit
 def get_dataset():
@@ -66,7 +66,7 @@ def spam_mail_features(df):
         possessive_pronouns = [token for token, pos in tokens if pos == 'POS' or pos == 'PRP$']
         return len(possessive_pronouns)
 
-    filename = "spam_mail_big.pkl"
+    filename = "ml/spam_mail_big.pkl"
     if os.path.exists(filename):
         with open(filename, "rb") as f:
             df = pickle.load(f)
@@ -96,7 +96,7 @@ def spam_mail_tsne(df):
     # Define the features we want to use
     features = ['char_length', 'token_length', 'num_nouns', 'num_stopwords', 'avg_token_length', 'num_special_chars', 'num_uppercase_words', 'num_adverbs', 'num_personal_pronouns', 'num_possessive_pronouns', 'num_capital_letters']
 
-    filename = "spam_mail_tsne_big.pkl"
+    filename = "ml/spam_mail_tsne_big.pkl"
     if os.path.exists(filename):
         with open(filename, "rb") as f:
             spam_mail = pickle.load(f)
