@@ -16,6 +16,7 @@ st.subheader('One Class SVM')
 st.write('One-class SVM is an unsupervised algorithm that learns a decision function for novelty detection: classifying new data as similar or different to the training set.')
 
 ### Sidebar - Collects user input features into dataframe
+st.sidebar.info("You can find this Code on [Github](https://github.com/swisscenturion/oneClassSVM)")
 st.sidebar.write('This dashboard is used to detect outliers in the dataset')
 st.sidebar.title('Hyperparameters')
 
