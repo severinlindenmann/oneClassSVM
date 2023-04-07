@@ -14,12 +14,12 @@ RUN python -m pip install -r requirements.txt
 WORKDIR /app
 COPY . /app
 
-# Creates a non-root user with an explicit UID and adds permission to access the /app folder
-# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
-RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
+# Download the punkt and averaged_perceptron_tagger packages to the NLTK data directory
+RUN python -c "import nltk;nltk.download('punkt', download_dir='/usr/share/nltk_data');nltk.download('averaged_perceptron_tagger', download_dir='/usr/share/nltk_data')"
 
-VOLUME /ml
+# Creates a non-root user with an explicit UID and adds permission to access the /app folder and NLTK data directory
+RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app /usr/share/nltk_data
+USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 CMD ["streamlit", "run", "ocsvm.py","--server.port","8080","--server.headless","true"]

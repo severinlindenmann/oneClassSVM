@@ -15,8 +15,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import numpy as np
 
 # Download the NLTK Data
-nltk.download('punkt', download_dir='ml')
-nltk.download('averaged_perceptron_tagger',download_dir='ml')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 @st.cache_data #for caching the data in streamlit
 def get_dataset():
