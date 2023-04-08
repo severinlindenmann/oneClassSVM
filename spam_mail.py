@@ -20,7 +20,7 @@ load_dotenv()
 ### check if run locally or in the cloud, the cloud can't handle the large dataset (performance issue)
 LOCAL = os.getenv('LOCAL')
 
-if LOCAL == 'True':
+if LOCAL == 'TRUE':
     # Download the NLTK Data
     nltk.download('punkt')
     nltk.download('averaged_perceptron_tagger')
@@ -155,61 +155,6 @@ def create_3d_visualization(X_tsne, df):
     
     export_to_pickle(fig, "3d_visualization_dataframe.pkl")
     return fig
-
-
-
-## remove ?? 
-# def visualize_3d_onclasssvm_linear(X, y_pred, clf):
-#     # create the 3D scatter plot
-#     trace1 = go.Scatter3d(
-#         x=X[y_pred == 0]['char_length'],
-#         y=X[y_pred == 0]['num_nouns'],
-#         z=X[y_pred == 0]['num_adverbs'],
-#         mode='markers',
-#         name='Non-Spam Emails',
-#         marker=dict(
-#             color='blue',
-#             size=5,
-#             opacity=0.8
-#         )
-#     )
-
-#     trace2 = go.Scatter3d(
-#         x=X[y_pred == 1]['char_length'],
-#         y=X[y_pred == 1]['num_nouns'],
-#         z=X[y_pred == 1]['num_adverbs'],
-#         mode='markers',
-#         name='Spam Emails',
-#         marker=dict(
-#             color='green',
-#             size=5,
-#             opacity=0.8
-#         )
-#     )
-
-#     trace3 = go.Surface(
-#         x=X['char_length'],
-#         y=X['num_nouns'],
-#         z=(-clf.intercept_[0] - clf.coef_[0][0] * X['char_length'] - clf.coef_[0][1] * X['num_nouns']) / clf.coef_[0][2],
-#         name='Hyperplane',
-#         showscale=False,
-#         opacity=0.9,
-#         colorscale='Blues'
-#     )
-
-#     layout = go.Layout(
-#         title='OneClassSVM Email Classifier',
-#         scene=dict(
-#             xaxis=dict(title='Character Length'),
-#             yaxis=dict(title='Number of Nouns'),
-#             zaxis=dict(title='Number of Adverbs')
-#         ),
-#         margin=dict(l=0, r=0, b=0, t=30)
-#     )
-    
-#     fig = go.Figure(data=[trace1, trace2, trace3], layout=layout)
-    
-#     return fig
 
 def visualize_onclasssvm(df, y_pred):
     X_tsne = spam_mail_tsne(df)
