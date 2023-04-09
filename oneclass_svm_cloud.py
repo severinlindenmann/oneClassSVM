@@ -48,6 +48,11 @@ def spam_mail_cloud(tab, kernel, nu, gamma, degree, score):
 
     ## show the code
     with tab.expander('Code', expanded=False):
+        code = inspect.getsource(spam_mail_tsne)
+        st.code(code)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
         code = inspect.getsource(create_3d_visualization)
         st.code(code)
 
@@ -77,7 +82,8 @@ def spam_mail_cloud(tab, kernel, nu, gamma, degree, score):
     col8.metric('F1 Score', values['F1 Score'])
 
     tab.write('Like before we create a 3d visualization of the dataset, but know we match the colors if the mail is a ham or spam and if it is predicted correctly or not.')
-    tab.write('The rbf kernel shows the best results. The sigmoid kernel shows the worst results, but that could also be our fault because we did not tune the parameters good enough for sigmoid.')
+    tab.warning('The data is overfitted and is not correct yet. We are working on it.')
+    # tab.write('The rbf kernel shows the best results. The sigmoid kernel shows the worst results, but that could also be our fault because we did not tune the parameters good enough for sigmoid.')
     fig = load_from_pickle(f'visualize_onclasssvm_{kernel}')
     tab.plotly_chart(fig)
 

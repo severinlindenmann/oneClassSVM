@@ -1,5 +1,5 @@
 import streamlit as st
-from spam_mail import spam_mail_features, get_dataset, spam_mail_tsne, create_3d_visualization, create_oneclass_svm_predict, visualize_onclasssvm
+from spam_mail import spam_mail_features, get_dataset, spam_mail_tsne, create_3d_visualization, create_oneclass_svm_predict, visualize_onclasssvm, export_and_visualize_oneclasssvm, create_best_model
 import inspect
 
 def spam_mail_local(tab, kernel, nu, gamma, degree, score):
@@ -43,6 +43,11 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score):
 
     ## show the code
     with tab.expander('Code', expanded=False):
+        code = inspect.getsource(spam_mail_tsne)
+        st.code(code)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
         code = inspect.getsource(create_3d_visualization)
         st.code(code)
 
@@ -51,7 +56,7 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score):
     tab.write('We use the One Class SVM algorithm to predict the spam mails. We use the following parameters settings:')
     tab.subheader('Settings')
 
-    fig, result = create_oneclass_svm_predict(df_mail_w_features, kernel, nu, gamma, degree)
+    fig, result = export_and_visualize_oneclasssvm(df_mail_w_features, kernel, nu, gamma, degree)
     
     col1, col2 = tab.columns(2)
     col3, col4 = tab.columns(2)
@@ -85,3 +90,12 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score):
     with tab.expander('Code', expanded=False):
         code = inspect.getsource(visualize_onclasssvm)
         st.code(code)
+
+
+    ### Evaluate the best Model
+    evaluate = tab.button('Evaluate the best Model')
+    if evaluate:
+        tab.title('Evaulate the best Model')
+        tab.write('We use the best model to predict the spam mails.')
+        result = create_best_model(df_mail_w_features)
+        tab.write(result)

@@ -15,6 +15,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import numpy as np
 from dotenv import load_dotenv
 import os
+import itertools
+from sklearn.model_selection import cross_validate
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 load_dotenv()
 
 ### check if run locally or in the cloud, the cloud can't handle the large dataset (performance issue)
@@ -204,31 +207,8 @@ def visualize_onclasssvm(df, y_pred):
     
     return fig
 
-
-
-@st.cache_resource
-def create_oneclass_svm_predict(df, kernel, nu, gamma, degree):
-    # separate the features and target columns
-    X = df[['char_length', 'token_length', 'num_nouns', 'num_stopwords', 'avg_token_length', 'num_special_chars', 'num_uppercase_words', 'num_adverbs', 'num_personal_pronouns', 'num_possessive_pronouns', 'num_capital_letters']]
-    y = df['target']
-
-    # create and fit the OneClassSVM model
-    clf = OneClassSVM(kernel=kernel, gamma=gamma, nu=nu, degree=degree)
-    clf.fit(X[y == 0])  # fit the model on non-spam emails
-    y_pred = clf.predict(X) # use the model to detect outliers (spam emails)
-
-    # 1 represents outliers (spam emails) in OneClassSVM
-    # replace 1 with 0 to get the target values as 0 for non-spam and 1 for spam
-    y_pred[y_pred == 1] = 0
-    y_pred[y_pred == -1] = 1
-
-    # calculate the accuracy score
-    accuracy = accuracy_score(y, y_pred)
-    precision = precision_score(y, y_pred)
-    recall = recall_score(y, y_pred)
-    f1 = f1_score(y, y_pred)
-    auc_roc = roc_auc_score(y, y_pred)
-    
+def export_and_visualize_oneclasssvm(df, kernel, nu, gamma, degree):
+    y_pred, accuracy, precision, recall, f1, auc_roc = create_oneclass_svm_predict(df, kernel, nu, gamma, degree)
     fig = visualize_onclasssvm(df, y_pred)
     values = {'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'AUC ROC': auc_roc}
     settings = {'kernel': kernel, 'nu': nu, 'gamma': gamma, 'degree': degree}
@@ -238,3 +218,59 @@ def create_oneclass_svm_predict(df, kernel, nu, gamma, degree):
     export_to_pickle(settings, f"settings_onclasssvm_{kernel}.pkl")
 
     return fig, values
+
+def create_oneclass_svm_predict(df, kernel, nu, gamma, degree):
+    # separate the features and target columns
+    X = df[['char_length', 'token_length', 'num_nouns', 'num_stopwords', 'avg_token_length', 'num_special_chars', 'num_uppercase_words', 'num_adverbs', 'num_personal_pronouns', 'num_possessive_pronouns', 'num_capital_letters']]
+    y = df['target']
+
+    # create the OneClassSVM model
+    clf = OneClassSVM(kernel=kernel, gamma=gamma, nu=nu, degree=degree)
+
+    clf.fit(X)
+
+    # evaluate the model using cross-validation
+    scoring = {'accuracy': make_scorer(accuracy_score),
+               'precision_macro': make_scorer(precision_score, average='macro',zero_division=1),
+               'recall_macro': make_scorer(recall_score, average='macro', zero_division=1),
+               'f1_macro': make_scorer(f1_score, average='macro', zero_division=1),
+               'roc_auc': make_scorer(roc_auc_score, average='macro')}
+    cv_results = cross_validate(clf, X, y, cv=5, scoring=scoring)
+
+    # return the average scores from the cross-validation
+    y_pred = clf.predict(X) # use the model to detect outliers (spam emails)
+    y_pred[y_pred == 1] = 0
+    y_pred[y_pred == -1] = 1
+
+    # calculate the mean scores across all folds
+    accuracy = cv_results['test_accuracy'].mean()
+    precision = cv_results['test_precision_macro'].mean()
+    recall = cv_results['test_recall_macro'].mean()
+    f1 = cv_results['test_f1_macro'].mean()
+    auc_roc = cv_results['test_roc_auc'].mean()
+
+    return y_pred, accuracy, precision, recall, f1, auc_roc
+    
+def create_best_model(df):
+    # define the values to try for each hyperparameter
+    kernels = ['linear', 'poly', 'rbf', 'sigmoid']
+    nus = [0.01, 0.05, 0.1, 0.15, 0.2]
+    gammas = ['scale', 'auto'] + [0.1, 0.5, 1, 5, 10]
+    degrees = [2, 3]
+
+    # initialize variables to store the best hyperparameters and metrics
+    best_params = {}
+    best_metrics = {'accuracy': 0}
+
+    # loop through all combinations of hyperparameters
+    for kernel, nu, gamma, degree in itertools.product(kernels, nus, gammas, degrees):
+        # fit the OneClassSVM model and calculate metrics
+        y_pred, accuracy, precision, recall, f1, auc_roc = create_oneclass_svm_predict(df, kernel, nu, gamma, degree)
+        print(f"kernel: {kernel}, nu: {nu}, gamma: {gamma}, degree: {degree}, accuracy: {accuracy}, precision: {precision}, recall: {recall}, f1: {f1}, auc_roc: {auc_roc}")
+        
+        # check if this set of hyperparameters produced the best accuracy so far
+        if accuracy > best_metrics['accuracy']:
+            best_params = {'kernel': kernel, 'nu': nu, 'gamma': gamma, 'degree': degree}
+            best_metrics = {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1': f1, 'auc_roc': auc_roc}
+    
+    return best_metrics, best_params

@@ -6,7 +6,7 @@ from sklearn.svm import OneClassSVM
 
 def generate_example_data():
     # Generate the example data
-    x, _ = make_classification(n_samples=200, n_features=2, n_redundant=0, n_informative=2, random_state=13)
+    x, _ = make_classification(n_samples=100, n_features=2, n_redundant=0, n_informative=2, random_state=13)
 
     # Create a scatter plot of the data points
     fig, ax = plt.subplots()
@@ -25,12 +25,21 @@ def create_oneclasssvm_demo(x, _, kernel, nu, gamma, degree, score):
     red = svm.fit_predict(x)
     scores = svm.score_samples(x)
 
-    thresh = quantile(scores, score)
-    index = where(scores<=thresh)
+    # compute the threshold based on the specified quantile
+    thresh = np.quantile(scores, score)
+    index = np.where(scores <= thresh)[0]
     values = x[index]
 
+    # define a function to set colors based on the predicted labels
+    def color(x):
+        if x == 1:
+            return 'b'
+        else:
+            return 'r'
+
+    # plot the data and the anomalies
     fig, ax = plt.subplots()
-    ax.scatter(x[:,0], x[:,1], c=_)
+    ax.scatter(x[:,0], x[:,1], c=[color(xi) for xi in red])
     ax.scatter(values[:,0], values[:,1], color='r')
 
     return fig, svm

@@ -21,7 +21,7 @@ st.sidebar.write('This dashboard is used to detect outliers in the dataset')
 st.sidebar.title('Hyperparameters')
 
 kernel = st.sidebar.selectbox('Kernel', ('rbf', 'linear', 'poly', 'sigmoid'))
-nu = st.sidebar.slider('NU', 0.05, 0.95, 0.1, 0.05)
+nu = st.sidebar.slider('NU', 0.01, 0.95, 0.1, 0.01)
 gamma = st.sidebar.slider('GAMMA', 0.5, 50.0, 10.0, 0.5)
 score = st.sidebar.slider('SCORE', 0.1, 1.0, 0.5, 0.1)
 
