@@ -31,8 +31,11 @@ degree = 0
 if kernel == 'poly': # only for poly
     degree = st.sidebar.slider('Degree', 0, 10, 3, 1)
 
-st.sidebar.title('Explore a Dataset')
-datasets = st.sidebar.selectbox('Dataset', ('Spam Mail', 'Credit Card Fraud'))
+if LOCAL:
+    st.sidebar.title('Explore a Dataset')
+    datasets = st.sidebar.selectbox('Dataset', ('Spam Mail', 'Credit Card Fraud'))
+else:
+    datasets = 'Spam Mail'
 
 ### Example Data
 tab1, tab2 = st.tabs(['Example Data', datasets])

@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 import os
 import itertools
 from sklearn.model_selection import cross_validate
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 load_dotenv()
 
@@ -35,6 +36,12 @@ def export_to_pickle(data, filename):
     print(f'Exporting {filename} to pickle')
     with open(f'cloud/{filename}', 'wb') as file:
         pickle.dump(data, file)
+
+### scale the data
+def scale_data(df):
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df)
+    return pd.DataFrame(df_scaled, columns=df.columns)
 
 @st.cache_data #for caching the data in streamlit
 def get_dataset():
@@ -211,6 +218,8 @@ def create_oneclass_svm_predict(df, kernel, nu, gamma, degree=3, outlier_fractio
     # separate the features and target columns
     X = df[['char_length', 'token_length', 'num_nouns', 'num_stopwords', 'avg_token_length', 'num_special_chars', 'num_uppercase_words', 'num_adverbs', 'num_personal_pronouns', 'num_possessive_pronouns', 'num_capital_letters']]
     y = df['target']
+
+    X = scale_data(X)
 
     # create the OneClassSVM model
     if gamma_scale:

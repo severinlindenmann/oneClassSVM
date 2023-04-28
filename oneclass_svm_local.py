@@ -5,9 +5,18 @@ import inspect
 
 def spam_mail_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gamma_scale):
 
+
+
     ### Load the mail dataset
     df = spm.get_dataset()
     tab.dataframe(df.head(), use_container_width=True)
+
+    if gamma_scale:
+        gamma = 'scale'
+    
+    if outlier_fraction:
+        nu = len(df[df['target']==1])/float(len(df[df['target']==0]))
+        print(f'Outlier Fraction: {outlier_fraction}')
 
     ## example of ham mail
     with tab.expander('Example of Ham Mail', expanded=False):
@@ -92,8 +101,6 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gam
     col11.metric('Recall', cv_result['Recall'])
     col12.metric('F1 Score', cv_result['F1 Score'])
 
-
-
     ## show the code
     with tab.expander('Code', expanded=False):
         code = inspect.getsource(spm.create_oneclass_svm_predict)
@@ -115,9 +122,18 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gam
 
 
 def credit_card_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gamma_scale):
+
     ### Load the cc dataset
     df = cc.get_dataset()
     tab.dataframe(df.head(), use_container_width=True)
+
+
+    if gamma_scale:
+        gamma = 'scale'
+    
+    if outlier_fraction:
+        nu = len(df[df['Class']==1])/float(len(df[df['Class']==0]))
+        print(f'Outlier Fraction: {outlier_fraction}')
 
     ## show the code
     with tab.expander('Code', expanded=False):
@@ -150,7 +166,7 @@ def credit_card_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, g
     
     col1, col2 = tab.columns(2)
     col3, col4 = tab.columns(2)
-
+    
     col1.metric('Kernel', kernel)
     col2.metric('Nu', nu)
     col3.metric('Gamma', gamma)
