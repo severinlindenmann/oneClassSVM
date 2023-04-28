@@ -1,5 +1,6 @@
 import streamlit as st
-from spam_mail import spam_mail_features, get_dataset, spam_mail_tsne, create_3d_visualization, create_oneclass_svm_predict, visualize_onclasssvm
+import spam_mail as spm
+import credit_card as cc
 import inspect
 import pickle
 
@@ -24,7 +25,7 @@ def spam_mail_cloud(tab, kernel, nu, gamma, degree, score):
 
     ## show the code
     with tab.expander('Code', expanded=False):
-        code = inspect.getsource(get_dataset)
+        code = inspect.getsource(spm.get_dataset)
         st.code(code)
 
     ### Feature Extraction
@@ -37,7 +38,7 @@ def spam_mail_cloud(tab, kernel, nu, gamma, degree, score):
 
     ## show the code
     with tab.expander('Code', expanded=False):
-        code = inspect.getsource(spam_mail_features)
+        code = inspect.getsource(spm.spam_mail_features)
         st.code(code)
 
     ### Create 3d Visualization with t-SNE
@@ -48,12 +49,12 @@ def spam_mail_cloud(tab, kernel, nu, gamma, degree, score):
 
     ## show the code
     with tab.expander('Code', expanded=False):
-        code = inspect.getsource(spam_mail_tsne)
+        code = inspect.getsource(spm.spam_mail_tsne)
         st.code(code)
 
     ## show the code
     with tab.expander('Code', expanded=False):
-        code = inspect.getsource(create_3d_visualization)
+        code = inspect.getsource(spm.create_3d_visualization)
         st.code(code)
 
     ### One Class SVM
@@ -89,10 +90,78 @@ def spam_mail_cloud(tab, kernel, nu, gamma, degree, score):
 
     ## show the code
     with tab.expander('Code', expanded=False):
-        code = inspect.getsource(create_oneclass_svm_predict)
+        code = inspect.getsource(spm.create_oneclass_svm_predict)
         st.code(code)
 
     ## show the code
     with tab.expander('Code', expanded=False):
-        code = inspect.getsource(visualize_onclasssvm)
+        code = inspect.getsource(spm.visualize_onclasssvm)
+        st.code(code)
+
+
+
+def credit_card_cloud(tab, kernel, nu, gamma, degree, score):
+    ### Load the cc dataset
+    # df = get_dataset()
+    df = load_from_pickle('creditcard_head')
+    tab.dataframe(df, use_container_width=True)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
+        code = inspect.getsource(cc.get_dataset)
+        st.code(code)
+
+    ### Create 3d Visualization with t-SNE
+    tab.subheader('Create 3d Visualization with t-SNE')
+    tab.write('We use the t-SNE algorithm to create a 3d visualization of the dataset. The visualization shows the spam and ham mails in a 3d space. The visualization shows that the spam mails and ham mails show some patterns. The ham mail create a spiral and the spam mails are more outside of the spiral.')
+    fig = load_from_pickle('3d_visualization_dataframe_cc')
+    tab.plotly_chart(fig)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
+        code = inspect.getsource(cc.spam_mail_tsne)
+        st.code(code)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
+        code = inspect.getsource(cc.create_3d_visualization)
+        st.code(code)
+
+    ### One Class SVM
+    tab.subheader('One Class SVM Prediction')
+    tab.write('We use the One Class SVM algorithm to predict the spam mails. We use the following parameters settings:')
+    tab.subheader('Settings')
+    col1, col2 = tab.columns(2)
+    col3, col4 = tab.columns(2)
+
+    values = load_from_pickle(f'values_onclasssvm_{kernel}_cc')
+    settings = load_from_pickle(f'settings_onclasssvm_{kernel}_cc')
+    
+    col1.metric('Kernel', settings['kernel'])
+    col2.metric('Nu', settings['nu'])
+    col3.metric('Gamma', settings['gamma'])
+    col4.metric('Degree', settings['degree'])
+
+    tab.subheader('Results')
+    tab.write('We got with this kernel the following results:')
+    col5, col6 = tab.columns(2)
+    col7, col8 = tab.columns(2)
+
+    col5.metric('Accuracy', values['Accuracy'])
+    col6.metric('Precision', values['Precision'])
+    col7.metric('Recall', values['Recall'])
+    col8.metric('F1 Score', values['F1 Score'])
+
+    tab.write('Like before we create a 3d visualization of the dataset, but know we match the colors if the mail is a ham or spam and if it is predicted correctly or not.')
+    fig = load_from_pickle(f'visualize_onclasssvm_{kernel}_cc')
+    tab.plotly_chart(fig)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
+        code = inspect.getsource(cc.create_oneclass_svm_predict)
+        st.code(code)
+
+    ## show the code
+    with tab.expander('Code', expanded=False):
+        code = inspect.getsource(cc.visualize_onclasssvm)
         st.code(code)

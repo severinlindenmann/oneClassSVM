@@ -207,24 +207,19 @@ def visualize_onclasssvm(df, y_pred):
     
     return fig
 
-def export_and_visualize_oneclasssvm(df, kernel, nu, gamma, degree):
-    y_pred, accuracy, precision, recall, f1, auc_roc = create_oneclass_svm_predict(df, kernel, nu, gamma, degree)
-    fig = visualize_onclasssvm(df, y_pred)
-    values = {'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'AUC ROC': auc_roc}
-    settings = {'kernel': kernel, 'nu': nu, 'gamma': gamma, 'degree': degree}
-
-    export_to_pickle(fig, f"visualize_onclasssvm_{kernel}.pkl")
-    export_to_pickle(values, f"values_onclasssvm_{kernel}.pkl")
-    export_to_pickle(settings, f"settings_onclasssvm_{kernel}.pkl")
-
-    return fig, values
-
-def create_oneclass_svm_predict(df, kernel, nu, gamma, degree):
+def create_oneclass_svm_predict(df, kernel, nu, gamma, degree=3, outlier_fraction=False, gamma_scale=False):
     # separate the features and target columns
     X = df[['char_length', 'token_length', 'num_nouns', 'num_stopwords', 'avg_token_length', 'num_special_chars', 'num_uppercase_words', 'num_adverbs', 'num_personal_pronouns', 'num_possessive_pronouns', 'num_capital_letters']]
     y = df['target']
 
     # create the OneClassSVM model
+    if gamma_scale:
+        gamma = 'scale'
+    
+    if outlier_fraction:
+        nu = len(df[df['target']==1])/float(len(df[df['target']==0]))
+        print(f'Outlier Fraction: {outlier_fraction}')
+
     clf = OneClassSVM(kernel=kernel, gamma=gamma, nu=nu, degree=degree)
 
     clf.fit(X)
@@ -235,6 +230,7 @@ def create_oneclass_svm_predict(df, kernel, nu, gamma, degree):
                'recall_macro': make_scorer(recall_score, average='macro', zero_division=1),
                'f1_macro': make_scorer(f1_score, average='macro', zero_division=1),
                'roc_auc': make_scorer(roc_auc_score, average='macro')}
+    
     cv_results = cross_validate(clf, X, y, cv=5, scoring=scoring)
 
     # return the average scores from the cross-validation
@@ -242,35 +238,55 @@ def create_oneclass_svm_predict(df, kernel, nu, gamma, degree):
     y_pred[y_pred == 1] = 0
     y_pred[y_pred == -1] = 1
 
-    # calculate the mean scores across all folds
-    accuracy = cv_results['test_accuracy'].mean()
-    precision = cv_results['test_precision_macro'].mean()
-    recall = cv_results['test_recall_macro'].mean()
-    f1 = cv_results['test_f1_macro'].mean()
-    auc_roc = cv_results['test_roc_auc'].mean()
+    # the result
+    accuracy = accuracy_score(y,y_pred)
+    precision = precision_score(y,y_pred)
+    recall = recall_score(y,y_pred)
+    f1 = f1_score(y,y_pred)
+    auc_roc = roc_auc_score(y,y_pred)
 
-    return y_pred, accuracy, precision, recall, f1, auc_roc
+    # calculate the mean scores across all folds
+    cv_accuracy = cv_results['test_accuracy'].mean()
+    cv_precision = cv_results['test_precision_macro'].mean()
+    cv_recall = cv_results['test_recall_macro'].mean()
+    cv_f1 = cv_results['test_f1_macro'].mean()
+    cv_auc_roc = cv_results['test_roc_auc'].mean()
+
+    return y_pred, [cv_accuracy, cv_precision, cv_recall, cv_f1, cv_auc_roc], [accuracy, precision, recall, f1, auc_roc]
+
+def export_and_visualize_oneclasssvm(df, kernel, nu, gamma, degree, outlier_fraction, gamma_scale):
+    y_pred, cv_res, res = create_oneclass_svm_predict(df, kernel, nu, gamma, degree, outlier_fraction, gamma_scale)
+    fig = visualize_onclasssvm(df, y_pred)
+    cv_values = {'Accuracy': cv_res[0], 'Precision': cv_res[1], 'Recall': cv_res[2], 'F1 Score': cv_res[3], 'AUC ROC': cv_res[4]}
+    values = {'Accuracy': res[0], 'Precision': res[1], 'Recall': res[2], 'F1 Score': res[3], 'AUC ROC': res[4]}
+    settings = {'kernel': kernel, 'nu': nu, 'gamma': gamma, 'degree': degree}
+
+    export_to_pickle(fig, f"visualize_onclasssvm_{kernel}.pkl")
+    export_to_pickle(cv_values, f"cv_values_onclasssvm_{kernel}.pkl")
+    export_to_pickle(values, f"values_onclasssvm_{kernel}.pkl")
+    export_to_pickle(settings, f"settings_onclasssvm_{kernel}.pkl")
+
+    return fig, values, cv_values
     
 def create_best_model(df):
     # define the values to try for each hyperparameter
-    kernels = ['linear', 'poly', 'rbf', 'sigmoid']
-    nus = [0.01, 0.05, 0.1, 0.15, 0.2]
-    gammas = ['scale', 'auto'] + [0.1, 0.5, 1, 5, 10]
-    degrees = [2, 3]
+    kernels = ['rbf']
+    nus = np.arange(0.10, 1.0, 0.10)
+    gammas = np.arange(0.5, 50.0, 2)
 
     # initialize variables to store the best hyperparameters and metrics
     best_params = {}
     best_metrics = {'accuracy': 0}
 
     # loop through all combinations of hyperparameters
-    for kernel, nu, gamma, degree in itertools.product(kernels, nus, gammas, degrees):
+    for kernel, nu, gamma in itertools.product(kernels, nus, gammas):
         # fit the OneClassSVM model and calculate metrics
-        y_pred, accuracy, precision, recall, f1, auc_roc = create_oneclass_svm_predict(df, kernel, nu, gamma, degree)
-        print(f"kernel: {kernel}, nu: {nu}, gamma: {gamma}, degree: {degree}, accuracy: {accuracy}, precision: {precision}, recall: {recall}, f1: {f1}, auc_roc: {auc_roc}")
+        y_pred, cv_res, res = create_oneclass_svm_predict(df, kernel, nu, gamma)
+        print(f"kernel: {kernel}, nu: {nu}, gamma: {gamma}, accuracy: {res[0]}, precision: {res[1]}, recall: {res[2]}, f1: {res[3]}, auc_roc: {res[4]}")
         
         # check if this set of hyperparameters produced the best accuracy so far
-        if accuracy > best_metrics['accuracy']:
-            best_params = {'kernel': kernel, 'nu': nu, 'gamma': gamma, 'degree': degree}
-            best_metrics = {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1': f1, 'auc_roc': auc_roc}
+        if res[0] > best_metrics['accuracy']:
+            best_params = {'kernel': kernel, 'nu': nu, 'gamma': gamma}
+            best_metrics = {'accuracy': res[0], 'precision': res[1], 'recall': res[2], 'F1 Score': res[3], 'AUC ROC': res[4]}
     
     return best_metrics, best_params
