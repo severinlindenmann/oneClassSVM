@@ -285,17 +285,17 @@ def create_best_model(df):
 
     # initialize variables to store the best hyperparameters and metrics
     best_params = {}
-    best_metrics = {'accuracy': 0}
+    best_metrics = {'F1 Score': 0.0}
 
     # loop through all combinations of hyperparameters
     for kernel, nu, gamma in itertools.product(kernels, nus, gammas):
         # fit the OneClassSVM model and calculate metrics
         y_pred, cv_res, res = create_oneclass_svm_predict(df, kernel, nu, gamma)
-        print(f"kernel: {kernel}, nu: {nu}, gamma: {gamma}, accuracy: {res[0]}, precision: {res[1]}, recall: {res[2]}, f1: {res[3]}, auc_roc: {res[4]}")
+        print(f"kernel: {kernel}, nu: {nu}, gamma: {gamma}, accuracy: {cv_res[0]}, precision: {cv_res[1]}, recall: {cv_res[2]}, f1: {cv_res[3]}, auc_roc: {cv_res[4]}")
         
-        # check if this set of hyperparameters produced the best accuracy so far
-        if res[0] > best_metrics['accuracy']:
+        # check if this set of hyperparameters produced the best F1 Score so far
+        if cv_res[3] > best_metrics['F1 Score']:
             best_params = {'kernel': kernel, 'nu': nu, 'gamma': gamma}
-            best_metrics = {'accuracy': res[0], 'precision': res[1], 'recall': res[2], 'F1 Score': res[3], 'AUC ROC': res[4]}
+            best_metrics = {'accuracy': cv_res[0], 'precision': cv_res[1], 'recall': cv_res[2], 'F1 Score': cv_res[3], 'AUC ROC': cv_res[4]}
     
     return best_metrics, best_params

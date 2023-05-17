@@ -16,7 +16,7 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gam
     
     if outlier_fraction:
         nu = len(df[df['target']==1])/float(len(df[df['target']==0]))
-        print(f'Outlier Fraction: {outlier_fraction}')
+        print(f'Outlier Fraction: {nu}')
 
     ## example of ham mail
     with tab.expander('Example of Ham Mail', expanded=False):
@@ -91,15 +91,15 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gam
     
     tab.plotly_chart(fig)
 
-    tab.subheader('Cross Validation Results')
-    tab.write('With Cross Validation we get a much lower result:')
-    col9, col10 = tab.columns(2)
-    col11, col12 = tab.columns(2)
+    # tab.subheader('Cross Validation Results')
+    # tab.write('With Cross Validation we get a much lower result:')
+    # col9, col10 = tab.columns(2)
+    # col11, col12 = tab.columns(2)
 
-    col9.metric('Accuracy', cv_result['Accuracy'])
-    col10.metric('Precision', cv_result['Precision'])
-    col11.metric('Recall', cv_result['Recall'])
-    col12.metric('F1 Score', cv_result['F1 Score'])
+    # col9.metric('Accuracy', cv_result['Accuracy'])
+    # col10.metric('Precision', cv_result['Precision'])
+    # col11.metric('Recall', cv_result['Recall'])
+    # col12.metric('F1 Score', cv_result['F1 Score'])
 
     ## show the code
     with tab.expander('Code', expanded=False):
@@ -113,7 +113,7 @@ def spam_mail_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, gam
 
 
     ### Evaluate the best Model
-    evaluate = tab.button('Evaluate the best Model')
+    evaluate = False
     if evaluate:
         tab.title('Evaulate the best Model')
         tab.write('We use the best model to predict the spam mails.')
@@ -132,7 +132,7 @@ def credit_card_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, g
         gamma = 'scale'
     
     if outlier_fraction:
-        nu = len(df[df['Class']==1])/float(len(df[df['Class']==0]))
+        nu = len(df[df['Class']==0])/float(len(df[df['Class']==1]))
         print(f'Outlier Fraction: {outlier_fraction}')
 
     ## show the code
@@ -164,6 +164,11 @@ def credit_card_local(tab, kernel, nu, gamma, degree, score, outlier_fraction, g
 
     fig, result, cv_result = cc.export_and_visualize_oneclasssvm(df, kernel, nu, gamma, degree, outlier_fraction, gamma_scale)
     
+    ## show the code
+    with tab.expander('Code', expanded=False):
+        code = inspect.getsource(cc.export_and_visualize_oneclasssvm)
+        st.code(code)
+
     col1, col2 = tab.columns(2)
     col3, col4 = tab.columns(2)
     
